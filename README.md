@@ -39,11 +39,13 @@ git commit -m "chore: Claude 규칙 서브모듈 추가 (common/nextjs/fsd)"
 
 ### 2. 클론 후 초기 설정
 
-```bash
-# 방법 1: 클론 시 함께 받기
-git clone --recurse-submodules <repo-url>
+서브모듈이 등록된 프로젝트를 클론할 때, 규칙 저장소 URL을 별도로 입력할 필요는 없다. 프로젝트의 `.gitmodules`에 서브모듈 정보가 이미 등록되어 있으므로, **프로젝트 URL만 클론하면 서브모듈 3개가 자동으로 받아진다.**
 
-# 방법 2: 이미 클론한 경우
+```bash
+# 방법 1: 클론 시 함께 받기 (프로젝트 URL만 입력하면 서브모듈 자동 포함)
+git clone --recurse-submodules <프로젝트-repo-url>
+
+# 방법 2: 이미 클론한 경우 (.claude/rules/ 하위 폴더가 비어 있을 때)
 git submodule init
 git submodule update
 ```
