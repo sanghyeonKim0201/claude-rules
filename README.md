@@ -1,27 +1,43 @@
 # Claude Rules
 
-Claude Code가 따라야 할 공유 코딩 규칙 모음입니다. git 서브모듈로 각 프로젝트에 연결하여 사용합니다.
+Claude Code가 따라야 할 공유 코딩 규칙 모음. 규칙은 역할별로 3개 저장소로 분리되어 있으며, 프로젝트에 필요한 조합만 서브모듈로 연결하여 사용한다.
 
-## 규칙 파일 목록
+## 규칙 저장소
 
-| 파일 | 설명 |
-| --- | --- |
-| `data-fetching.md` | 데이터 페칭 및 상태 관리 패턴 |
-| `design-principles.md` | 디자인 원칙 |
-| `fsd-architecture.md` | FSD 아키텍처 상세 규칙 |
-| `naming.md` | 네이밍 컨벤션 |
-| `separation-of-concerns.md` | 관심사 분리 원칙 |
+| 저장소 | 설명 | 포함 규칙 |
+|---|---|---|
+| [claude-rules-common](https://github.com/sanghyeonKim0201/claude-rules-common) | 언어/프레임워크 무관 공통 규칙 | Git 컨벤션, 설계 원칙, 네이밍 원칙, 순수 함수 분리 |
+| [claude-rules-nextjs](https://github.com/sanghyeonKim0201/claude-rules-nextjs) | Next.js/React/TypeScript 규칙 | 네이밍, 설계 원칙, 데이터 페칭, 관심사 분리 |
+| [claude-rules-fsd](https://github.com/sanghyeonKim0201/claude-rules-fsd) | FSD 아키텍처 전용 규칙 | FSD 레이어 구조, Public API, Import, 관심사 분리 |
 
-## 프로젝트에 적용하기
+## 프로젝트 유형별 조합
 
-### 새 프로젝트에 서브모듈 추가
+| 프로젝트 유형 | 서브모듈 조합 |
+|---|---|
+| Next.js + FSD | common + nextjs + fsd |
+| Next.js (FSD 미사용) | common + nextjs |
+| 비 Next.js (Spring Boot 등) | common + (해당 프레임워크 규칙) |
+
+## 설정 가이드
+
+### 1. 새 프로젝트에 서브모듈 추가
+
+일반적인 Next.js + FSD 프로젝트 기준 (3개 전부 추가):
 
 ```bash
-git submodule add https://github.com/sanghyeonKim0201/claude-rules.git .claude/rules
-git commit -m "chore: Claude 규칙 서브모듈 추가"
+cd <프로젝트 루트>
+
+# 서브모듈 추가
+git submodule add https://github.com/sanghyeonKim0201/claude-rules-common.git .claude/rules/common
+git submodule add https://github.com/sanghyeonKim0201/claude-rules-nextjs.git .claude/rules/nextjs
+git submodule add https://github.com/sanghyeonKim0201/claude-rules-fsd.git .claude/rules/fsd
+
+# 커밋
+git add .gitmodules .claude/rules
+git commit -m "chore: Claude 규칙 서브모듈 추가 (common/nextjs/fsd)"
 ```
 
-### 클론 후 설정
+### 2. 클론 후 초기 설정
 
 ```bash
 # 방법 1: 클론 시 함께 받기
@@ -32,15 +48,35 @@ git submodule init
 git submodule update
 ```
 
-### 최신 규칙으로 업데이트
+### 3. 정상 확인
 
 ```bash
-git submodule update --remote .claude/rules
+ls .claude/rules/
+```
+
+아래처럼 폴더가 보이면 정상이다.
+
+```
+common/    — common.md
+nextjs/    — naming.md, design-principles.md, data-fetching.md, separation-of-concerns.md
+fsd/       — fsd-architecture.md, separation-of-concerns.md
+```
+
+### 4. 규칙 업데이트
+
+모든 서브모듈을 최신으로 받을 때:
+
+```bash
+git submodule update --remote .claude/rules/common
+git submodule update --remote .claude/rules/nextjs
+git submodule update --remote .claude/rules/fsd
+
 git add .claude/rules
 git commit -m "chore: Claude 규칙 서브모듈 업데이트"
 ```
 
 ## 주의 사항
 
-- 규칙 수정은 이 저장소에서 직접 수행합니다. 프로젝트 내에서 파일을 직접 수정하지 마세요.
-- 서브모듈 관련 에러 발생 시 `git submodule update --init`을 실행해보세요.
+- 프로젝트 내 `.claude/rules/` 파일을 **직접 수정하지 않는다.** 규칙 변경은 해당 규칙 저장소에서 수정 후 서브모듈을 업데이트한다.
+- 서브모듈 관련 에러 발생 시 `git submodule update --init`을 실행해본다.
+- CI/CD 파이프라인에서 클론할 때 `--recurse-submodules` 옵션을 추가해야 서브모듈이 함께 받아진다.
