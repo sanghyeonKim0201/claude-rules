@@ -1,14 +1,20 @@
 # Claude Rules
 
-Claude Code가 따라야 할 공유 코딩 규칙 모음. 규칙은 역할별로 3개 저장소로 분리되어 있으며, 프로젝트에 필요한 조합만 서브모듈로 연결하여 사용한다.
+Claude Code가 따라야 할 공유 코딩 규칙 모음. 규칙은 역할별로 분리되어 있으며, 프로젝트에 필요한 조합만 서브모듈로 연결하여 사용한다.
 
 ## 규칙 저장소
 
 | 저장소 | 설명 | 포함 규칙 |
 |---|---|---|
 | [claude-rules-common](https://github.com/sanghyeonKim0201/claude-rules-common) | 언어/프레임워크 무관 공통 규칙 | Git 컨벤션, 설계 원칙, 네이밍 원칙, 순수 함수 분리 |
-| [claude-rules-nextjs](https://github.com/sanghyeonKim0201/claude-rules-nextjs) | Next.js/React/TypeScript 규칙 | 네이밍, 설계 원칙, 데이터 페칭, 관심사 분리 |
+| [claude-rules-nextjs](https://github.com/sanghyeonKim0201/claude-rules-nextjs) | Next.js/React/TypeScript 규칙 | 네이밍, 설계 원칙, 데이터 페칭, 관심사 분리, FSD-Next.js 통합 규칙 |
 | [claude-rules-fsd](https://github.com/sanghyeonKim0201/claude-rules-fsd) | FSD 아키텍처 전용 규칙 | FSD 레이어 구조, Public API, Import, 관심사 분리 |
+
+## 조합 원칙
+
+- `common`은 거의 모든 프로젝트에 기본으로 적용한다.
+- `fsd`는 아키텍처 규칙이므로 **특정 언어/프레임워크와 독립적으로** 조합할 수 있어야 한다.
+- `nextjs`는 Next.js/React/TypeScript 프로젝트에서만 사용한다.
 
 ## 프로젝트 유형별 조합
 
@@ -16,13 +22,15 @@ Claude Code가 따라야 할 공유 코딩 규칙 모음. 규칙은 역할별로
 |---|---|
 | Next.js + FSD | common + nextjs + fsd |
 | Next.js (FSD 미사용) | common + nextjs |
-| 비 Next.js (Spring Boot 등) | common + (해당 프레임워크 규칙) |
+| Spring Boot + FSD | common + fsd + (향후 spring 규칙) |
+| Flutter + FSD | common + fsd + (향후 flutter 규칙) |
+| 비 Next.js / 비 FSD | common + (해당 프레임워크 규칙) |
 
 ## 설정 가이드
 
 ### 1. 새 프로젝트에 서브모듈 추가
 
-일반적인 Next.js + FSD 프로젝트 기준 (3개 전부 추가):
+일반적인 Next.js + FSD 프로젝트 기준:
 
 ```bash
 cd <프로젝트 루트>
@@ -39,10 +47,10 @@ git commit -m "chore: Claude 규칙 서브모듈 추가 (common/nextjs/fsd)"
 
 ### 2. 클론 후 초기 설정
 
-서브모듈이 등록된 프로젝트를 클론할 때, 규칙 저장소 URL을 별도로 입력할 필요는 없다. 프로젝트의 `.gitmodules`에 서브모듈 정보가 이미 등록되어 있으므로, **프로젝트 URL만 클론하면 서브모듈 3개가 자동으로 받아진다.**
+서브모듈이 등록된 프로젝트를 클론할 때, 규칙 저장소 URL을 별도로 입력할 필요는 없다. 프로젝트의 `.gitmodules`에 서브모듈 정보가 이미 등록되어 있으므로, **프로젝트 URL만 클론하면 서브모듈이 함께 받아진다.**
 
 ```bash
-# 방법 1: 클론 시 함께 받기 (프로젝트 URL만 입력하면 서브모듈 자동 포함)
+# 방법 1: 클론 시 함께 받기
 git clone --recurse-submodules <프로젝트-repo-url>
 
 # 방법 2: 이미 클론한 경우 (.claude/rules/ 하위 폴더가 비어 있을 때)
@@ -60,7 +68,7 @@ ls .claude/rules/
 
 ```
 common/    — common.md
-nextjs/    — naming.md, design-principles.md, data-fetching.md, separation-of-concerns.md
+nextjs/    — naming.md, design-principles.md, data-fetching.md, separation-of-concerns.md, fsd-integration.md
 fsd/       — fsd-architecture.md, separation-of-concerns.md
 ```
 
