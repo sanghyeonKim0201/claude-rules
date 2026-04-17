@@ -27,16 +27,25 @@ description: 모든 프로젝트에 적용되는 공통 규칙
 **버전 관리 (태그 + 릴리즈):**
 
 - 태그는 **릴리즈 단위**(의미 있는 기능 묶음·마일스톤)에서만 생성한다. 자잘한 개별 커밋마다 찍지 않는다.
-- 사용자가 "버전 관리", "릴리즈", "태그" 등을 요청하면 아래 절차를 수행한다:
-  1. 마지막 태그 이후 커밋 내역을 `git log` 로 확인해 변경 범위를 파악한다.
-  2. Semantic Versioning(`vMAJOR.MINOR.PATCH`)에 따라 버전을 결정한다:
-     - `MAJOR` — 호환되지 않는 API 변경 (기존 prop 제거, 토큰 이름 변경 등)
-     - `MINOR` — 하위 호환 기능 추가 (새 컴포넌트, 새 prop 등)
-     - `PATCH` — 하위 호환 버그 수정
-  3. `git tag -a vX.Y.Z -m "메시지"` → `git push origin vX.Y.Z`
-  4. `gh release create vX.Y.Z --title "제목" --notes "변경 내역"` 로 GitHub Release를 생성한다.
-- Release notes에는 **신규 기능 / 기존 변경 / 버그 수정 / 주의사항**을 구분해 작성한다.
-- 태그를 찍을 만한 시점 판단 기준: 새 컴포넌트 추가, 공개 API 변경, 주요 버그 수정, 사용자가 명시적으로 요청.
+
+**자동 실행 기준 — `dev` 브랜치에 push 완료 후 아래 조건 중 하나라도 충족되면 버전 관리를 자동으로 실행한다:**
+
+| 조건 | 버전 범프 |
+|---|---|
+| 호환되지 않는 API 변경 (기존 prop 제거·이름 변경, 토큰 이름 변경 등) | **MAJOR** |
+| 새 컴포넌트·새 공개 prop·새 공개 API 추가 | **MINOR** |
+| 버그 수정만 (feat 없이 fix만) | **PATCH** |
+
+- `docs`, `style`, `chore`, `refactor`, `test` 커밋만 있으면 버전을 올리지 않는다.
+- 한 번의 push에 여러 단계가 섞이면 **가장 높은 단계**를 적용한다 (MAJOR > MINOR > PATCH).
+
+**절차:**
+
+1. 마지막 태그 이후 커밋 내역을 `git log` 로 확인해 변경 범위를 파악한다.
+2. 위 기준표에 따라 Semantic Versioning(`vMAJOR.MINOR.PATCH`) 버전을 결정한다.
+3. `git tag vX.Y.Z` → `git push origin vX.Y.Z`
+4. `gh release create vX.Y.Z --title "제목" --notes "변경 내역"` 로 GitHub Release를 생성한다.
+5. Release notes에는 **새 기능 / 개선 / 버그 수정 / 주의사항(Breaking Changes)**을 구분해 작성한다.
 
 ## 외부 도구 사용 전략
 
