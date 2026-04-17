@@ -24,6 +24,17 @@ description: 모든 프로젝트에 적용되는 공통 규칙
 - `chore` — (코드의 수정 없이) 설정을 변경
 - `wip` — 작업 중 (Work In Progress)
 
+**버전 관리 (태그 + 릴리즈):**
+
+- 커밋 후 사용자가 버전 관리를 요청하면 **반드시** git 태그를 생성하고 GitHub Release를 추가한다.
+- 태그는 [Semantic Versioning](https://semver.org/lang/ko/) 규칙을 따른다: `vMAJOR.MINOR.PATCH`
+  - `MAJOR` — 호환되지 않는 API 변경 (기존 prop 제거, 토큰 이름 변경 등)
+  - `MINOR` — 하위 호환 기능 추가 (새 컴포넌트, 새 prop 등)
+  - `PATCH` — 하위 호환 버그 수정
+- 태그 생성: `git tag -a vX.Y.Z -m "메시지"` → `git push origin vX.Y.Z`
+- GitHub Release: `gh release create vX.Y.Z --title "제목" --notes "변경 내역"` 로 생성한다.
+- Release notes에는 **신규 기능 / 기존 변경 / 버그 수정 / 주의사항**을 구분해 작성한다.
+
 ## 외부 도구 사용 전략
 
 MCP는 AI 대화 중 자동 연동이 필요한 것만 연결하고, 나머지는 CLI로 직접 호출한다.
