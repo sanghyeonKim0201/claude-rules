@@ -42,6 +42,59 @@ prop으로 분기하는 설계 대신, **자식·sub-component로 조합**하는
 - sub-component는 반드시 **부모와 함께 써야 의미가 있는 것**만. 독립적으로 의미 있으면 별도 컴포넌트로 승격.
 - sub-component도 독립적으로 export하여 사용자가 재배치·커스터마이즈 가능하게 한다.
 
+## 플랫폼별 관용 — React는 compound, Flutter는 named slot
+
+같은 "컴포지션" 원칙을 적용하되, **플랫폼의 구문 관용에 맞춘다**. 무리하게 통일하면 오히려 어색해진다.
+
+### React — Compound component
+
+JSX + Context + `React.Children` 덕분에 compound가 자연스럽다. **기본 패턴**.
+
+```tsx
+<Dialog>
+  <DialogTrigger>열기</DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>제목</DialogTitle>
+    </DialogHeader>
+    <DialogBody>본문</DialogBody>
+  </DialogContent>
+</Dialog>
+```
+
+- 각 파트가 형제 위치로 자유 배치
+- 상태는 Context로 공유 (`DialogContext`)
+- 파트 중 일부만 선택적으로 사용 가능
+- 복잡한 UI 구성에서도 읽기 편함
+
+### Flutter — Named slot
+
+Dart 문법상 중첩이 비싸서 compound보다 **생성자 slot**이 관용적.
+
+```dart
+ShUiDialog(
+  header: ShUiDialogHeader(title: '제목'),
+  body: Text('본문'),
+  footer: Row(children: [ShUiButton(label: '확인')]),
+)
+```
+
+- Flutter 표준 패턴 (`Scaffold(appBar:, body:, drawer:)` 등)과 일치
+- 생성자 시그니처로 구조가 명확
+- 상태 공유 필요 시 `InheritedWidget` + 생성자 slot 조합
+
+### 하면 안 되는 것
+
+- **React에서 named slot으로 prop 폭증**: `<Dialog header={...} footer={...} action={...}>` — compound 쓰자.
+- **Flutter에서 JSX 흉내**: `ShUiDialog(child: Column(children: [ShUiDialogHeader(...), ShUiDialogBody(...)]))` — 정보량 대비 문법 비용이 너무 크다. named slot이 낫다.
+- **플랫폼 API 강제 통일**: 두 플랫폼 API를 동일하게 맞추려고 하지 않는다. 사용자 경험은 각 플랫폼 관용에 맞출 때 더 좋다.
+
+### 예외 — Flutter에서도 compound를 쓸 때
+
+- **슬롯 배치에 사용자 자유도가 핵심 가치**인 경우 (예: Carousel의 prev/next/indicators 위치)
+- **선택적 파트가 많고 named slot으로 담으면 생성자가 비대**해질 때
+- 그때도 `Stack` / `Row` / `Column` 안에 자식들을 명시적으로 배치하는 형태가 된다 — 기꺼이 받아들이든지, 아니면 named slot으로 압축하든지 판단.
+
 ## Headless vs Styled
 
 | 패턴 | 쓸 때 |
