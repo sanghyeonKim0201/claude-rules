@@ -160,3 +160,4 @@ gstack은 Claude Code를 "가상 엔지니어링 팀"으로 만드는 슬래시 
 - **프로덕션에 영향을 주는 커맨드(`/land-and-deploy`, force-push 등) 실행 전에는 사용자 확인을 받는다.** `/guard`가 켜져 있더라도 최종 승인은 사람이 내린다.
 - **하네스 설정(`.claude/settings.json`, hooks, custom skill 등)을 변경할 때는 `common`의 외부 도구 사용 전략을 따른다.** 팀 공유 설정은 `settings.json`, 개인/로컬 설정은 `settings.local.json`에 두고 후자는 커밋하지 않는다.
 - **gstack 플로우(`/autoplan`, `/plan-*-review`, `/review`, `/qa` 등)는 설계 결정이 필요한 작업에 쓴다.** 답이 이미 명확한 작은 변경(타이포, config 수정, 단순 버그픽스, 문서 정정, 스타일 정리 등)에는 쓰지 않는다 — 토큰 대비 실익이 없다.
+- **superpowers와 같이 쓸 때 디버깅은 `systematic-debugging`(superpowers)을 기본값으로 한다.** superpowers 플러그인이 자동 호출하므로 `/investigate`보다 활성화 비용이 낮다. gstack 특유의 4-phase 구조화 리포트(스크린샷·타임라인 등)가 **명시적으로** 필요할 때만 `/investigate`로 수동 전환한다. 자세한 분담은 `superpowers/superpowers.md` 참조.
