@@ -10,6 +10,7 @@ Claude Code가 따라야 할 공유 코딩 규칙 모음. 모든 규칙을 **하
 | [`nextjs/`](./nextjs) | Next.js / React / TypeScript 규칙 | 네이밍, 설계 원칙, 데이터 페칭, 관심사 분리, FSD-Next.js 통합 |
 | [`fsd/`](./fsd) | FSD 아키텍처 전용 규칙 | 레이어 구조, Public API, Import, 관심사 분리 |
 | [`ui/`](./ui) | UI/UX 설계 원칙 (프레임워크 무관) | 컴포넌트 API, 접근성, UI 상태, 디자인 토큰, 컴포지션 |
+| [`gstack/`](./gstack) | gstack 슬래시 커맨드 사용 규칙 (Claude Code 전용) | 커맨드 카탈로그, 스프린트 단계별 사용 시기, 표준 플로우 |
 
 ## 조합 원칙
 
@@ -17,6 +18,7 @@ Claude Code가 따라야 할 공유 코딩 규칙 모음. 모든 규칙을 **하
 - `fsd`는 아키텍처 규칙이므로 언어/프레임워크와 독립적으로 조합 가능.
 - `nextjs`는 Next.js/React/TypeScript 프로젝트에서만 사용.
 - `ui`는 디자인 시스템·UI 컴포넌트 작업이 있는 프로젝트에서 사용 (프레임워크 무관).
+- `gstack`은 로컬 머신에 gstack이 설치돼 있고 Claude Code 슬래시 커맨드를 쓰는 프로젝트에만 추가한다 (코드 컨벤션이 아니라 워크플로우 규칙).
 
 ## 프로젝트 유형별 조합
 
@@ -28,6 +30,7 @@ Claude Code가 따라야 할 공유 코딩 규칙 모음. 모든 규칙을 **하
 | Spring Boot + FSD | `common` + `fsd` + (향후 spring) |
 | Flutter + FSD | `common` + `fsd` + (향후 flutter) |
 | 비 Next.js / 비 FSD | `common` + (해당 프레임워크 규칙) |
+| gstack 워크플로우 사용 | (기존 조합) + `gstack` |
 
 ## 설정 가이드
 
