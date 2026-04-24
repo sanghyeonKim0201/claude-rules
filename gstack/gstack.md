@@ -1,165 +1,150 @@
 ---
-description: gstack(Garry Tan의 AI coding agent 워크플로우 스킬 팩) 사용 규칙 — 커맨드 카탈로그와 사용 시기
+description: gstack(Garry Tan의 AI coding agent 워크플로우 스킬 팩) 사용 규칙 — 커맨드 카탈로그와 호출 트리거
 ---
 
 # gstack 사용 규칙
 
 **모든 답변은 한국어로 작성하세요.**
 
-gstack은 AI 코딩 에이전트를 "가상 엔지니어링 팀"처럼 쓰기 위한 워크플로우 스킬/커맨드 모음이다. CEO·디자이너·엔지니어링 매니저·리뷰어·QA 리드·릴리즈 엔지니어 역할이 각자 스킬로 존재한다. 이 규칙은 **언제 어떤 커맨드를 쓸지**를 정한다.
+gstack은 AI 코딩 에이전트를 "가상 엔지니어링 팀"처럼 쓰기 위한 워크플로우 스킬/커맨드 모음이다. CEO·디자이너·엔지니어링 매니저·리뷰어·QA 리드·릴리즈 엔지니어 역할이 각자 스킬로 존재한다. 이 규칙은 **어떤 상황에서 어떤 커맨드가 후보가 되는지**를 정한다.
 
-gstack은 Claude Code뿐 아니라 Codex CLI, OpenCode, Cursor, Factory Droid, Slate, Kiro, Hermes, GBrain 등 여러 host를 지원한다. 다만 실제 호출 방식과 설치 경로는 host마다 다를 수 있으므로, 프로젝트에 적용할 때는 현재 사용하는 host의 gstack 설치 문서를 우선 확인한다.
+gstack은 Claude Code뿐 아니라 Codex CLI, OpenCode, Cursor, Factory Droid, Slate, Kiro, Hermes, GBrain 등 여러 host를 지원한다. 실제 호출 방식과 설치 경로는 host마다 다를 수 있으므로, 프로젝트에 적용할 때는 현재 사용하는 host의 gstack 설치 문서를 우선 확인한다.
 
 ## 핵심 원칙
 
-- **gstack은 프로세스다.** 단발성 툴이 아니라 `Think → Plan → Build → Review → Test → Ship → Reflect` 스프린트 흐름에서 이어서 쓴다. 각 단계의 산출물이 다음 단계의 입력이 된다.
-- **브라우저 작업은 항상 gstack의 `/browse` 흐름으로 한다.** host가 제공하는 저수준 브라우저 MCP/도구를 직접 호출하지 않는다.
-- **질문 폭주를 피하려면 `/autoplan`을 우선 고려한다.** 개별 `/plan-*-review`를 순차 실행하는 대신 자동 파이프라인이 taste decision만 묻는다.
+- **규칙은 플로우가 아니라 신호다.** "항상 이 순서대로 써라"가 아니라 "이 신호가 오면 이 커맨드가 후보가 된다"로 읽는다. 프로젝트 성격과 작업 규모에 맞게 유동적으로 판단한다.
+- **작은 변경에는 쓰지 않는다.** 답이 이미 명확한 작업(타이포·config·문서 정정·명확한 버그픽스)에는 어떤 gstack 커맨드도 호출하지 않는다. "제외 조건" 섹션 참조.
 - **한 번에 한 커맨드만 실행한다.** 커맨드는 상호작용형이고 사이드이펙트가 있다. 파이프라이닝 금지.
+- **프로덕션에 영향을 주는 커맨드 실행 전에는 사용자 확인을 받는다** (`/land-and-deploy`, force-push 등). `/guard`가 켜져 있어도 최종 승인은 사람이 내린다.
 - **안전이 필요한 상황에서는 먼저 `/guard`로 감싼다** (prod 작업, 라이브 시스템 디버깅, 마이그레이션 등).
 
-## 스프린트 단계별 커맨드
+## 호출 트리거 (신호 기반)
 
-| 단계 | 기본 커맨드 | 목적 |
-|---|---|---|
-| Think | `/office-hours` | 제품 가정을 깨뜨리고 진짜 문제 재정의 |
-| Plan | `/autoplan` 또는 `/plan-ceo-review` + `/plan-eng-review` | 스코프·아키텍처 락인 |
-| Build | (일반 코딩) | 플랜 승인 후 구현 |
-| Review | `/review`, `/codex`(2nd opinion) | 코드 리뷰 + 자동 수정 |
-| Test | `/qa`, `/qa-only` | 실제 브라우저로 기능 검증 |
-| Ship | `/ship` → `/land-and-deploy` → `/canary` | PR 생성·머지·배포·헬스체크 |
-| Reflect | `/retro`, `/document-release`, `/learn` | 회고·문서 동기화·학습 기록 |
+아래 신호 중 하나에 해당할 때만 해당 커맨드를 후보로 본다. 여러 신호가 겹치면 우선순위가 높은 하나만 고르고, 신호가 없으면 호출하지 않는다. 순서·체인은 강제하지 않는다.
 
-## 커맨드 카탈로그
+### 기획 / 플랜
 
-### 기획 / 전략
-
-| 커맨드 | 사용 시기 |
+| 신호 | 후보 커맨드 |
 |---|---|
-| `/office-hours` | 새 아이디어·새 기능을 구상할 때. 코드 쓰기 전 6가지 강제 질문으로 프레이밍 재검토. 산출물은 design doc. |
-| `/plan-ceo-review` | 플랜이 있는데 "정말 이게 베스트냐"를 따져야 할 때. 4가지 스코프 모드(확장/선택적 확장/고정/축소). |
+| 새 제품·새 아이디어. "이걸 만들 가치가 있나"가 먼저 정리돼야 함 | `/office-hours` |
+| 작성된 플랜이 있고 스코프·야망 재검토가 필요 | `/plan-ceo-review` |
+| 플랜이 있고 질문 폭주 없이 한 번에 리뷰받고 싶음 (UI/API/아키텍처 혼합) | `/autoplan` |
+| UI·UX 위주의 플랜 | `/plan-design-review` |
+| API·CLI·SDK·개발자 대면 인터페이스 플랜 | `/plan-devex-review` |
+| 복잡한 아키텍처·상태 머신·성능 이슈가 있는 플랜 | `/plan-eng-review` |
 
-### 플랜 리뷰 (구현 전)
+**중복 호출 금지:** `/autoplan`과 개별 `/plan-*-review`를 같은 플랜에 둘 다 쓰지 않는다. 하나만 고른다.
 
-| 커맨드 | 대상 | 사용 시기 |
-|---|---|---|
-| `/autoplan` | 전부 자동 | **기본값.** CEO→디자인→엔지니어링→DX 리뷰를 자동 실행. 질문은 taste decision만 노출. |
-| `/plan-eng-review` | 아키텍처·데이터 플로우 | 복잡한 백엔드·상태 머신·성능 이슈 있는 플랜. |
-| `/plan-design-review` | UI·UX 플랜 | 사용자 대면 화면이 있는 플랜. |
-| `/plan-devex-review` | API·CLI·SDK·문서 | 개발자 대면 인터페이스가 있는 플랜. |
+### 구현 / 디버깅
 
-**Plan-Review 3종 선택 기준:**
-- End user 대상(UI, 웹앱, 모바일) → `/plan-design-review` → (배포 후) `/design-review`
-- 개발자 대상(API, CLI, SDK) → `/plan-devex-review` → (배포 후) `/devex-review`
-- 아키텍처·성능·테스트 → `/plan-eng-review` → (배포 후) `/review`
-- 전부 해당 → `/autoplan`
-
-### 디자인
-
-| 커맨드 | 사용 시기 |
+| 신호 | 후보 커맨드 |
 |---|---|
-| `/design-consultation` | 프로젝트에 디자인 시스템이 없을 때. `DESIGN.md` 생성. |
-| `/design-shotgun` | "어떻게 생겨야 할지" 감이 없을 때. 4–6개 변형 시안 비교 + 피드백 반복. |
-| `/design-html` | 승인된 목업을 실제 프로덕션 HTML/CSS로 변환. |
-| `/design-review` | 배포된 화면 시각 QA + 자동 수정. (플랜 단계는 `/plan-design-review`) |
+| 배포된 실물을 브라우저로 조작·검증·스크린샷·DOM 확인이 필요 | `/browse` |
+| 원인 불명 버그 + 4-phase 구조화 리포트(스크린샷·타임라인)가 명시적으로 필요 | `/investigate` |
 
-### 리뷰 / 디버깅 / 보안
+> superpowers를 같이 쓰는 환경에서는 일반 디버깅의 기본값이 `systematic-debugging`이다. gstack `/investigate`는 구조화 리포트가 명시적으로 필요할 때만 수동 전환.
 
-| 커맨드 | 사용 시기 |
+### 리뷰
+
+| 신호 | 후보 커맨드 |
 |---|---|
-| `/review` | 머지 직전 PR 리뷰. SQL 안전성·LLM 트러스트 경계·조건부 사이드이펙트 체크. 자동 수정 가능한 건 처리. |
-| `/codex` | `/review` 이후 **다른 모델(OpenAI Codex)** 의 독립 리뷰. 교차 검증·적대적 챌린지·오픈 상담 3모드. |
-| `/investigate` | 원인 불명 버그·"어제까지 됐는데" 이슈. 근본 원인 찾기 전까지 수정 금지(Iron Law). |
-| `/cso` | 보안 감사. OWASP Top 10 + STRIDE 위협 모델. daily / comprehensive 모드. |
+| 머지 직전 diff를 SQL 안전성·LLM 트러스트 경계 관점으로 한 번 더 훑어야 함 | `/review` |
+| `/review`를 끝내고 다른 모델(OpenAI Codex)의 독립 리뷰로 교차 검증하고 싶음 | `/codex` |
 
-### QA / 브라우저
+**순서:** `/codex`는 `/review` 이후에 쓴다. 순서를 바꾸면 교차 분석 모드가 활성화되지 않는다.
 
-| 커맨드 | 사용 시기 |
+### 디자인 (UI가 있는 프로덕트에만 해당)
+
+| 신호 | 후보 커맨드 |
 |---|---|
-| `/qa` | 기능 배포 전·후 실제 브라우저로 플로우 테스트 + 버그 발견 시 커밋 단위로 자동 수정·회귀 테스트 생성. |
-| `/qa-only` | 수정 없이 버그 리포트만 필요할 때. |
-| `/browse` | 임의의 URL을 열거나 스크린샷·상호작용·DOM 확인. **모든 브라우저 작업의 기본값.** |
-| `/devex-review` | 배포된 개발자 대면 제품(문서·CLI·API)을 실제로 사용해 보며 TTHW·에러 메시지 평가. |
-| `/setup-browser-cookies` | 로그인이 필요한 페이지 QA 전 Chrome/Arc/Brave 쿠키 가져오기. |
+| 프로젝트에 디자인 시스템 문서가 없음 | `/design-consultation` (최초 1회) |
+| "어떻게 생겨야 할지" 감이 없음 | `/design-shotgun` |
+| 승인된 목업이 있고 프로덕션 HTML/CSS로 변환이 필요 | `/design-html` |
+| 배포된 화면이 있고 시각 일관성·슬롭 패턴 검증이 필요 | `/design-review` |
+
+### QA / 브라우저 (사용자 인터페이스가 있는 프로덕트에만 해당)
+
+| 신호 | 후보 커맨드 |
+|---|---|
+| 기능이 배포 가능한 상태. 실제 브라우저 플로우로 검증 + 버그 발견 시 자동 수정 | `/qa` |
+| 수정 권한 없는 브랜치(main, 남의 PR)에서 리포트만 만들고 싶음 | `/qa-only` |
+| 개발자 대면 제품(문서·CLI·API)의 TTHW·에러 메시지를 실제 사용해보고 평가 | `/devex-review` |
+| 로그인 필요한 페이지를 QA해야 함 | `/setup-browser-cookies` (선행) |
 
 ### 릴리즈 / 운영
 
-| 커맨드 | 사용 시기 |
+| 신호 | 후보 커맨드 |
 |---|---|
-| `/ship` | 코드 완성 후. 테스트 실행·커버리지 감사·버전 범프·`CHANGELOG` 갱신·PR 생성까지. |
-| `/land-and-deploy` | PR 승인 후 머지·CI·배포·프로덕션 헬스 검증. `/setup-deploy` 선행 필요. |
-| `/canary` | 배포 직후 모니터링 루프. 콘솔 에러·성능 리그레션·페이지 실패 감시. |
-| `/benchmark` | 페이지 로드·Core Web Vitals·리소스 크기 기준선 설정. PR 전후 비교. |
-| `/document-release` | 배포 후 README·ARCHITECTURE·CONTRIBUTING·CLAUDE.md·CHANGELOG 동기화. |
-| `/setup-deploy` | `/land-and-deploy` 최초 1회 설정. 배포 플랫폼·헬스체크 엔드포인트 탐지. |
+| 테스트 통과 + 릴리즈 준비. 버전 범프·CHANGELOG·PR 생성을 일관되게 | `/ship` |
+| PR이 승인됐고 머지·CI·배포·프로덕션 헬스 확인까지 자동화 | `/land-and-deploy` |
+| 배포 직후 일정 시간 모니터링이 필요 | `/canary` |
+| 페이지 로드·Core Web Vitals·번들 크기 기준선 수립 또는 PR 전후 비교 | `/benchmark` |
+| 배포 후 README·ARCHITECTURE·CHANGELOG 등 문서 동기화 | `/document-release` |
+| `/land-and-deploy` 최초 1회 설정 (배포 플랫폼·헬스체크 엔드포인트 탐지) | `/setup-deploy` |
+
+### 보안
+
+| 신호 | 후보 커맨드 |
+|---|---|
+| 의존성·시크릿·CI/CD·LLM 트러스트 경계 등 정기 감사 | `/cso` (daily) |
+| 심층 위협 모델이 필요 (월간·릴리즈 이벤트) | `/cso` (comprehensive) |
 
 ### 안전장치
 
-| 커맨드 | 사용 시기 |
+| 신호 | 후보 커맨드 |
 |---|---|
-| `/careful` | `rm -rf`, `DROP TABLE`, force-push, `git reset --hard` 등 파괴적 명령 경고. prod 건드릴 때. |
-| `/freeze` | 편집 범위를 특정 디렉터리로 제한. 디버깅 중 의도치 않은 광범위 수정 차단. |
-| `/guard` | `/careful` + `/freeze` 동시 활성. **prod·라이브 시스템 작업의 기본값.** |
-| `/unfreeze` | `/freeze` 해제. |
+| prod 건드릴 예정 + 파괴적 명령 경고가 필요 | `/careful` |
+| 디버깅 중 의도치 않은 광범위 수정 차단 | `/freeze` |
+| 위 둘이 동시에 필요 (prod·라이브 시스템 기본값) | `/guard` |
+| `/freeze` 해제 | `/unfreeze` |
 
 ### 회고 / 메타
 
-| 커맨드 | 사용 시기 |
+| 신호 | 후보 커맨드 |
 |---|---|
-| `/retro` | 주간 엔지니어링 회고. 커밋 히스토리·시프 퀄리티·트렌드. `retro global`은 모든 프로젝트 교차 분석. |
-| `/learn` | 세션 간 학습 내용 관리. 검색·프루닝·익스포트. |
-| `/context-save` / `/context-restore` | 작업 도중 세션을 떠나야 할 때. 다른 세션·워크트리에서 이어서. |
-| `/gstack-upgrade` | gstack 버전 업데이트. 글로벌 vs vendored 자동 감지. |
+| 주간 엔지니어링 회고 (커밋·시프 퀄리티·트렌드) | `/retro` |
+| 세션 간 학습 내용 관리 (검색·프루닝·익스포트) | `/learn` |
+| 작업 도중 세션을 떠나야 함 | `/context-save` |
+| 다른 세션·워크트리에서 이어가기 | `/context-restore` |
+| gstack 버전 업데이트 | `/gstack-upgrade` |
 
-### 파워 툴 / 기타
+### 파워 툴
 
-| 커맨드 | 사용 시기 |
+| 신호 | 후보 커맨드 |
 |---|---|
-| `/pair-agent` | 다른 AI 에이전트(OpenClaw, Hermes, Codex 등)와 브라우저 공유. 각자 자기 탭. |
-| `/open-gstack-browser` | 헤디드 Chromium이 필요할 때(봇 차단 사이트, 사이드바 디버깅). |
-| `/benchmark-models` | Claude vs GPT vs Gemini를 같은 프롬프트로 비교. 스킬별 최적 모델 결정. |
+| 다른 AI 에이전트와 브라우저 공유가 필요 | `/pair-agent` |
+| 봇 차단 사이트·사이드바 디버깅 등 헤디드 브라우저가 필요 | `/open-gstack-browser` |
+| 같은 프롬프트를 Claude/GPT/Gemini에 던져 비교하고 싶음 | `/benchmark-models` |
 
-## 표준 플로우
+## 프로젝트 유형별 적용 범위
 
-**신규 기능 (0 → 1):**
-```
-/office-hours → /autoplan → (승인) → 구현 → /review → /qa → /ship → /land-and-deploy → /canary → /document-release
-```
+프로젝트 성격에 따라 위 트리거 중 실제로 의미 있는 것만 활성화된다. 나머지는 신호가 들어와도 후보에서 제외한다.
 
-**기존 기능 개선 (UI):**
-```
-/plan-design-review → 구현 → /design-review → /review → /qa → /ship
-```
+| 프로젝트 유형 | 주로 쓰는 커맨드 | 보통 제외 |
+|---|---|---|
+| 웹 앱 / 문서 사이트 | 위 트리거 전부 적용 가능 | — |
+| 모바일 앱 | 디자인·UI QA는 플랫폼 특화 도구로 대체. 플랜/리뷰/보안은 유효 | 브라우저 기반 `/qa`·`/browse` |
+| 라이브러리 / SDK / npm 패키지 | `/review`·`/codex`·`/ship` 중심. 퍼블릭 문서·샘플 페이지가 있으면 `/design-review`도 후보 | UI 없으면 `/design-*`·`/qa`. 배포 대상이 없으면 `/canary`·`/land-and-deploy` |
+| CLI 도구 | `/review`·`/codex`·`/devex-review`·`/ship` 중심 | `/design-*`·`/qa`·`/canary` |
+| 백엔드 / 서비스 | `/review`·`/cso`·`/land-and-deploy`·`/canary`·`/benchmark` | `/design-*`·`/qa` |
+| 데이터 파이프라인 / ML | `/review`·`/cso`·`/benchmark` | `/design-*`·`/qa`·`/canary` |
+| 모노레포 (여러 유형 혼재) | 패키지별로 위 기준을 따로 적용 | — |
 
-**버그 수정:**
-```
-/investigate → 구현 → /review → /qa → /ship
-```
+프로젝트의 엔트리포인트(`CLAUDE.md`·`AGENTS.md` 등)에서 본 레포에 포함되지 않는 커맨드 유형을 명시하면 판단이 더 빨라진다. 예: "이 레포는 npm 라이브러리다. `/canary`·`/land-and-deploy`는 적용되지 않는다."
 
-**디자인 탐색부터 구현까지:**
-```
-/design-consultation (최초 1회) → /design-shotgun → /design-html → /qa → /ship
-```
+## 제외 조건 (무조건 호출 안 함)
 
-**보안 감사:**
-```
-/cso (daily 또는 comprehensive) → /investigate (발견된 이슈) → 수정 → /review → /ship
-```
+아래 중 하나라도 해당하면 gstack 커맨드를 쓰지 않는다. 이 조건은 "후보"보다 우선한다.
 
-**릴리즈:**
-```
-/ship → /land-and-deploy → /canary → /document-release → /retro (주간)
-```
+- 답이 이미 명확한 작은 변경 (타이포·config·문서 정정·명확한 버그픽스·스타일 정리)
+- 2파일·50줄 이하의 변경 (프로젝트별로 조정 가능한 기본값)
+- 사용자가 명시적으로 "가볍게 해" / "커맨드 없이" / "직접 해" 라고 요청
+- 작업 범위가 `/freeze` 디렉터리 밖인데 `/freeze`가 활성
+- 프로젝트 엔트리포인트가 해당 커맨드를 "적용 제외"로 명시
 
 ## 주의사항
 
-- **기존 프로젝트 규칙(common / nextjs / fsd / ui)이 우선.** gstack은 워크플로우 도구이지 코드 컨벤션을 대체하지 않는다. `/ship`이 만드는 커밋 메시지가 이 레포의 Git 컨벤션(`feat`, `fix`, `docs` 등)을 따르는지 확인한다.
-- **버전 범프 규칙은 `common`의 버전 관리 규칙을 따른다.** `/ship`의 기본 동작이 이 규칙과 충돌하면 레포 규칙을 우선한다.
-- **`/autoplan`이 없는 플랜에 `/plan-*-review`를 겹쳐 쓰지 않는다.** 중복 질문과 모순된 권고가 나온다. 하나만 고른다.
-- **`/qa`와 `/qa-only`는 다르다.** 수정 권한이 없는 브랜치(main, 남의 PR)에서는 `/qa-only`를 쓴다.
+- **코어 규칙(common / nextjs / fsd / ui 등)이 우선.** gstack은 워크플로우 도구이지 코드 컨벤션을 대체하지 않는다. `/ship`이 만드는 커밋 메시지가 프로젝트의 Git 컨벤션(`feat`, `fix`, `docs` 등)을 따르는지 확인한다.
+- **버전 범프 규칙은 프로젝트의 `common`을 따른다.** `/ship`의 기본 동작이 레포 규칙과 충돌하면 레포 규칙을 우선한다.
 - **`/freeze` 활성 상태를 잊지 않는다.** 편집이 차단될 때 `/unfreeze`를 먼저 확인.
-- **`/codex`는 `/review` 이후에 쓴다.** 순서를 바꾸면 교차 분석 모드가 활성화되지 않는다.
-- **프로덕션에 영향을 주는 커맨드(`/land-and-deploy`, force-push 등) 실행 전에는 사용자 확인을 받는다.** `/guard`가 켜져 있더라도 최종 승인은 사람이 내린다.
 - **하네스 설정(host별 settings, hooks, custom skill 등)을 변경할 때는 `common`의 외부 도구 사용 전략을 따른다.** 팀 공유 설정과 개인/로컬 설정을 분리하고, 개인 설정은 커밋하지 않는다.
-- **gstack 플로우(`/autoplan`, `/plan-*-review`, `/review`, `/qa` 등)는 설계 결정이 필요한 작업에 쓴다.** 답이 이미 명확한 작은 변경(타이포, config 수정, 단순 버그픽스, 문서 정정, 스타일 정리 등)에는 쓰지 않는다 — 토큰 대비 실익이 없다.
-- **superpowers와 같이 쓸 때 디버깅은 `systematic-debugging`(superpowers)을 기본값으로 한다.** superpowers 플러그인이 자동 호출하므로 `/investigate`보다 활성화 비용이 낮다. gstack 특유의 4-phase 구조화 리포트(스크린샷·타임라인 등)가 **명시적으로** 필요할 때만 `/investigate`로 수동 전환한다. 자세한 분담은 `superpowers/superpowers.md` 참조.

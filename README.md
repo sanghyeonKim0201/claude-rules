@@ -12,8 +12,8 @@ AI 코딩 에이전트가 따라야 할 공유 코딩 규칙 모음. Claude Code
 | [`nextjs/`](./nextjs) | Next.js / React / TypeScript 규칙 | 네이밍, 설계 원칙, 데이터 페칭, 관심사 분리, FSD-Next.js 통합 |
 | [`fsd/`](./fsd) | FSD 아키텍처 전용 규칙 | 레이어 구조, Public API, Import, 관심사 분리 |
 | [`ui/`](./ui) | UI/UX 설계 원칙 (프레임워크 무관) | 컴포넌트 API, 접근성, UI 상태, 디자인 토큰, 컴포지션 |
-| [`gstack/`](./gstack) | gstack 워크플로우 스킬/커맨드 사용 규칙 (지원 AI 에이전트 공통 선택 규칙) | 커맨드 카탈로그, 스프린트 단계별 사용 시기, 표준 플로우 |
-| [`superpowers/`](./superpowers) | superpowers 플러그인 사용 규칙 (Claude Code 환경 전용 선택 규칙) | 스킬 카탈로그, gstack과의 역할 분담, 표준 플로우 |
+| [`gstack/`](./gstack) | gstack 워크플로우 스킬/커맨드 사용 규칙 (지원 AI 에이전트 공통 선택 규칙) | 커맨드 카탈로그, 호출 트리거(신호 기반), 프로젝트 유형별 적용 범위 |
+| [`superpowers/`](./superpowers) | superpowers 플러그인 사용 규칙 (Claude Code 환경 전용 선택 규칙) | 스킬 카탈로그, 호출 트리거(신호 기반), gstack과의 역할 분담 |
 | [`templates/`](./templates) | 프로젝트 엔트리포인트 템플릿 | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `copilot-instructions.md` |
 
 ## 조합 원칙
