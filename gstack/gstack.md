@@ -1,17 +1,19 @@
 ---
-description: gstack(Garry Tan의 Claude Code 스킬 팩) 사용 규칙 — 커맨드 카탈로그와 사용 시기
+description: gstack(Garry Tan의 AI coding agent 워크플로우 스킬 팩) 사용 규칙 — 커맨드 카탈로그와 사용 시기
 ---
 
 # gstack 사용 규칙
 
 **모든 답변은 한국어로 작성하세요.**
 
-gstack은 Claude Code를 "가상 엔지니어링 팀"으로 만드는 슬래시 커맨드 모음이다. CEO·디자이너·엔지니어링 매니저·리뷰어·QA 리드·릴리즈 엔지니어 역할이 각자 스킬로 존재한다. 이 규칙은 **언제 어떤 커맨드를 쓸지**를 정한다.
+gstack은 AI 코딩 에이전트를 "가상 엔지니어링 팀"처럼 쓰기 위한 워크플로우 스킬/커맨드 모음이다. CEO·디자이너·엔지니어링 매니저·리뷰어·QA 리드·릴리즈 엔지니어 역할이 각자 스킬로 존재한다. 이 규칙은 **언제 어떤 커맨드를 쓸지**를 정한다.
+
+gstack은 Claude Code뿐 아니라 Codex CLI, OpenCode, Cursor, Factory Droid, Slate, Kiro, Hermes, GBrain 등 여러 host를 지원한다. 다만 실제 호출 방식과 설치 경로는 host마다 다를 수 있으므로, 프로젝트에 적용할 때는 현재 사용하는 host의 gstack 설치 문서를 우선 확인한다.
 
 ## 핵심 원칙
 
 - **gstack은 프로세스다.** 단발성 툴이 아니라 `Think → Plan → Build → Review → Test → Ship → Reflect` 스프린트 흐름에서 이어서 쓴다. 각 단계의 산출물이 다음 단계의 입력이 된다.
-- **브라우저 작업은 항상 `/browse`로 한다.** `mcp__claude-in-chrome__*` 도구를 직접 호출하지 않는다.
+- **브라우저 작업은 항상 gstack의 `/browse` 흐름으로 한다.** host가 제공하는 저수준 브라우저 MCP/도구를 직접 호출하지 않는다.
 - **질문 폭주를 피하려면 `/autoplan`을 우선 고려한다.** 개별 `/plan-*-review`를 순차 실행하는 대신 자동 파이프라인이 taste decision만 묻는다.
 - **한 번에 한 커맨드만 실행한다.** 커맨드는 상호작용형이고 사이드이펙트가 있다. 파이프라이닝 금지.
 - **안전이 필요한 상황에서는 먼저 `/guard`로 감싼다** (prod 작업, 라이브 시스템 디버깅, 마이그레이션 등).
@@ -158,6 +160,6 @@ gstack은 Claude Code를 "가상 엔지니어링 팀"으로 만드는 슬래시 
 - **`/freeze` 활성 상태를 잊지 않는다.** 편집이 차단될 때 `/unfreeze`를 먼저 확인.
 - **`/codex`는 `/review` 이후에 쓴다.** 순서를 바꾸면 교차 분석 모드가 활성화되지 않는다.
 - **프로덕션에 영향을 주는 커맨드(`/land-and-deploy`, force-push 등) 실행 전에는 사용자 확인을 받는다.** `/guard`가 켜져 있더라도 최종 승인은 사람이 내린다.
-- **하네스 설정(`.claude/settings.json`, hooks, custom skill 등)을 변경할 때는 `common`의 외부 도구 사용 전략을 따른다.** 팀 공유 설정은 `settings.json`, 개인/로컬 설정은 `settings.local.json`에 두고 후자는 커밋하지 않는다.
+- **하네스 설정(host별 settings, hooks, custom skill 등)을 변경할 때는 `common`의 외부 도구 사용 전략을 따른다.** 팀 공유 설정과 개인/로컬 설정을 분리하고, 개인 설정은 커밋하지 않는다.
 - **gstack 플로우(`/autoplan`, `/plan-*-review`, `/review`, `/qa` 등)는 설계 결정이 필요한 작업에 쓴다.** 답이 이미 명확한 작은 변경(타이포, config 수정, 단순 버그픽스, 문서 정정, 스타일 정리 등)에는 쓰지 않는다 — 토큰 대비 실익이 없다.
 - **superpowers와 같이 쓸 때 디버깅은 `systematic-debugging`(superpowers)을 기본값으로 한다.** superpowers 플러그인이 자동 호출하므로 `/investigate`보다 활성화 비용이 낮다. gstack 특유의 4-phase 구조화 리포트(스크린샷·타임라인 등)가 **명시적으로** 필요할 때만 `/investigate`로 수동 전환한다. 자세한 분담은 `superpowers/superpowers.md` 참조.

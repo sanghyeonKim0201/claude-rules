@@ -1,6 +1,8 @@
-# Claude Rules
+# AI Rules
 
-Claude Code가 따라야 할 공유 코딩 규칙 모음. 모든 규칙을 **하나의 저장소**에서 관리하며, 프로젝트에 필요한 규칙만 **sparse-checkout**으로 선택해 가져간다.
+AI 코딩 에이전트가 따라야 할 공유 코딩 규칙 모음. Claude Code, Codex, Cursor, Gemini CLI, Windsurf 등 특정 모델·제품에 종속되지 않는 **프로젝트 규칙 저장소**로 사용한다.
+
+모든 규칙은 **하나의 저장소**에서 관리하며, 프로젝트에 필요한 규칙만 **sparse-checkout**으로 선택해 가져간다. 에이전트별 설정 파일은 이 저장소의 규칙을 읽어 오거나 참조하는 얇은 어댑터로 둔다.
 
 ## 규칙 구성
 
@@ -10,8 +12,9 @@ Claude Code가 따라야 할 공유 코딩 규칙 모음. 모든 규칙을 **하
 | [`nextjs/`](./nextjs) | Next.js / React / TypeScript 규칙 | 네이밍, 설계 원칙, 데이터 페칭, 관심사 분리, FSD-Next.js 통합 |
 | [`fsd/`](./fsd) | FSD 아키텍처 전용 규칙 | 레이어 구조, Public API, Import, 관심사 분리 |
 | [`ui/`](./ui) | UI/UX 설계 원칙 (프레임워크 무관) | 컴포넌트 API, 접근성, UI 상태, 디자인 토큰, 컴포지션 |
-| [`gstack/`](./gstack) | gstack 슬래시 커맨드 사용 규칙 (Claude Code 전용) | 커맨드 카탈로그, 스프린트 단계별 사용 시기, 표준 플로우 |
-| [`superpowers/`](./superpowers) | superpowers 플러그인 사용 규칙 (Claude Code 전용) | 스킬 카탈로그, gstack과의 역할 분담, 표준 플로우 |
+| [`gstack/`](./gstack) | gstack 워크플로우 스킬/커맨드 사용 규칙 (지원 AI 에이전트 공통 선택 규칙) | 커맨드 카탈로그, 스프린트 단계별 사용 시기, 표준 플로우 |
+| [`superpowers/`](./superpowers) | superpowers 플러그인 사용 규칙 (Claude Code 환경 전용 선택 규칙) | 스킬 카탈로그, gstack과의 역할 분담, 표준 플로우 |
+| [`templates/`](./templates) | 프로젝트 엔트리포인트 템플릿 | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `copilot-instructions.md` |
 
 ## 조합 원칙
 
@@ -19,8 +22,9 @@ Claude Code가 따라야 할 공유 코딩 규칙 모음. 모든 규칙을 **하
 - `fsd`는 아키텍처 규칙이므로 언어/프레임워크와 독립적으로 조합 가능.
 - `nextjs`는 Next.js/React/TypeScript 프로젝트에서만 사용.
 - `ui`는 디자인 시스템·UI 컴포넌트 작업이 있는 프로젝트에서 사용 (프레임워크 무관).
-- `gstack`은 로컬 머신에 gstack이 설치돼 있고 Claude Code 슬래시 커맨드를 쓰는 프로젝트에만 추가한다 (코드 컨벤션이 아니라 워크플로우 규칙).
-- `superpowers`는 superpowers 플러그인을 쓰는 Claude Code 프로젝트에만 추가한다 (gstack과 역할이 분리되므로 함께 써도 충돌하지 않는다).
+- `gstack`은 로컬 머신에 gstack이 설치돼 있고 현재 사용하는 AI 코딩 에이전트가 gstack host로 지원될 때 추가한다. 코어 규칙이 아니라 도구 실행 환경용 워크플로우 어댑터다.
+- `superpowers`는 superpowers 플러그인을 쓰는 Claude Code 프로젝트에만 추가한다. 코어 규칙이 아니라 특정 실행 환경용 워크플로우 어댑터다.
+- 새 에이전트 전용 규칙이 필요하면 기존 코어 폴더를 수정하지 말고 별도 폴더로 분리한다. 예: `codex/`, `cursor/`, `gemini/`.
 
 ## 프로젝트 유형별 조합
 
@@ -32,56 +36,115 @@ Claude Code가 따라야 할 공유 코딩 규칙 모음. 모든 규칙을 **하
 | Spring Boot + FSD | `common` + `fsd` + (향후 spring) |
 | Flutter + FSD | `common` + `fsd` + (향후 flutter) |
 | 비 Next.js / 비 FSD | `common` + (해당 프레임워크 규칙) |
+| 특정 에이전트 워크플로우 사용 | (기존 조합) + 해당 에이전트 전용 폴더 |
 | gstack 워크플로우 사용 | (기존 조합) + `gstack` |
 | superpowers 플러그인 사용 | (기존 조합) + `superpowers` |
 | gstack + superpowers 둘 다 사용 | (기존 조합) + `gstack` + `superpowers` |
+
+## 에이전트 중립 원칙
+
+- 코어 규칙(`common`, `nextjs`, `fsd`, `ui`)에는 특정 모델명, 제품명, 전용 명령어를 넣지 않는다.
+- 특정 에이전트에서만 동작하는 명령어·훅·플러그인 규칙은 별도 폴더에 둔다.
+- 여러 에이전트에서 동작하는 도구라도 host별 설치 경로·명령 호출 방식이 다르면 본문에서 지원 범위를 명시한다.
+- 같은 프로젝트에서 여러 AI 도구를 써도 동일한 코어 규칙을 공유한다.
+- 에이전트별 설정 파일은 코어 규칙을 복사하거나 요약하지 말고 가능한 한 이 저장소의 파일을 참조한다.
+- 저장소 경로는 관례일 뿐이다. `.ai/rules`, `.claude/rules`, `.cursor/rules`, `.codex/rules` 등 팀의 도구 체인에 맞게 정한다.
 
 ## 설정 가이드
 
 ### 1. 프로젝트에 규칙 추가 (필요한 폴더만)
 
+권장 기본 경로는 `.ai/rules`다. 이미 특정 도구의 규칙 로더를 쓰고 있다면 해당 도구가 읽는 경로를 사용해도 된다.
+
 ```bash
 cd <프로젝트 루트>
 
 # 1) 서브모듈 추가 (전체 monorepo를 논리적으로 연결)
-git submodule add https://github.com/sanghyeonKim0201/claude-rules.git .claude/rules
+git submodule add <rules-repo-url> .ai/rules
 
 # 2) sparse-checkout으로 필요한 폴더만 실제 체크아웃
-cd .claude/rules
+cd .ai/rules
 git sparse-checkout init --cone
 git sparse-checkout set common nextjs        # 예: Next.js 프로젝트
 cd -
 
 # 3) 커밋
-git add .gitmodules .claude/rules
-git commit -m "chore: Claude 규칙 서브모듈 추가 (common/nextjs)"
+git add .gitmodules .ai/rules
+git commit -m "chore: AI 규칙 서브모듈 추가 (common/nextjs)"
 ```
 
 결과:
 ```
-.claude/rules/
+.ai/rules/
 ├── common/
 └── nextjs/
 ```
 
 `fsd`, `ui`, 기타 폴더는 원격에 존재하지만 **이 프로젝트엔 받지 않는다.**
 
-### 2. 이미 서브모듈이 있는 프로젝트를 clone할 때
+기존 Claude Code 프로젝트는 경로를 유지해도 된다:
+
+```bash
+git submodule add <rules-repo-url> .claude/rules
+```
+
+중요한 것은 경로명이 아니라 필요한 규칙 폴더 조합을 같은 방식으로 관리하는 것이다.
+
+### 2. 프로젝트 루트 엔트리포인트 연결
+
+서브모듈만 추가하면 AI 도구가 규칙을 자동으로 읽는다는 보장이 없다. 프로젝트 루트 또는 도구별 설정 경로에 각 도구가 읽는 엔트리포인트 파일을 만들고, 실제 규칙 파일 링크를 명시한다.
+
+아래 목록은 대표 관례이며, 도구 버전에 따라 달라질 수 있으므로 팀에서 쓰는 도구의 공식 문서를 우선한다.
+
+| 도구 | 권장 파일 |
+|---|---|
+| 여러 AI 에이전트 공통 | `AGENTS.md` |
+| Claude Code | `CLAUDE.md`, `CLAUDE.local.md`, `.claude/rules/*.md` |
+| Codex | `AGENTS.md` |
+| Gemini CLI | `GEMINI.md` 또는 설정한 context file name |
+| GitHub Copilot | `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `AGENTS.md` |
+| Cursor | `AGENTS.md`, `.cursor/rules/*.mdc`, `.cursorrules`(legacy) |
+| Windsurf | `AGENTS.md`, `.windsurf/rules/*.md` |
+| 여러 도구 병행 | `AGENTS.md`를 공통 허브로 두고, 도구 전용 파일은 `AGENTS.md` 또는 `.ai/rules`를 참조 |
+
+템플릿을 복사해 시작한다:
+
+```bash
+cp .ai/rules/templates/CLAUDE.md CLAUDE.md
+cp .ai/rules/templates/AGENTS.md AGENTS.md
+cp .ai/rules/templates/GEMINI.md GEMINI.md
+mkdir -p .github
+cp .ai/rules/templates/copilot-instructions.md .github/copilot-instructions.md
+```
+
+프로젝트에 실제로 체크아웃한 규칙만 남긴다. 예를 들어 `common + nextjs`만 쓰면 엔트리포인트에는 다음 링크만 남긴다:
+
+```markdown
+- [공통 규칙](.ai/rules/common/common.md)
+- [Next.js 규칙](.ai/rules/nextjs/naming.md)
+- [Next.js 설계 원칙](.ai/rules/nextjs/design-principles.md)
+- [Next.js 데이터 페칭](.ai/rules/nextjs/data-fetching.md)
+- [Next.js 관심사 분리](.ai/rules/nextjs/separation-of-concerns.md)
+```
+
+`AGEMNT.md`가 아니라 `AGENTS.md`를 쓴다. Codex, GitHub Copilot, Cursor, Windsurf 등 여러 에이전트 런타임에서 이 이름을 지원하거나 관례적으로 사용한다.
+
+### 3. 이미 서브모듈이 있는 프로젝트를 clone할 때
 
 ```bash
 # 전체 서브모듈 파일 포함 클론
 git clone --recurse-submodules <프로젝트-repo-url>
 
 # sparse-checkout 설정이 자동 적용되지 않으면 수동으로:
-cd .claude/rules
+cd .ai/rules
 git sparse-checkout init --cone
 git sparse-checkout set common nextjs        # 이 프로젝트에 맞는 조합으로
 ```
 
-### 3. 규칙 조합 변경
+### 4. 규칙 조합 변경
 
 ```bash
-cd .claude/rules
+cd .ai/rules
 git sparse-checkout set common nextjs ui     # ui 추가
 # 또는
 git sparse-checkout set common fsd           # 완전 재지정
@@ -89,27 +152,28 @@ git sparse-checkout set common fsd           # 완전 재지정
 
 `set`은 매번 **전체 조합**을 지정한다. 기존에 없던 폴더는 추가로 받고, 기존에 있던 폴더 중 빠진 건 제거됨.
 
-### 4. 규칙 업데이트
+### 5. 규칙 업데이트
 
 ```bash
-git submodule update --remote .claude/rules
-git add .claude/rules
-git commit -m "chore: Claude 규칙 업데이트"
+git submodule update --remote .ai/rules
+git add .ai/rules
+git commit -m "chore: AI 규칙 업데이트"
 ```
 
 sparse-checkout 설정은 유지된다.
 
-### 5. 정상 확인
+### 6. 정상 확인
 
 ```bash
-ls .claude/rules/
+ls .ai/rules/
 ```
 
 지정한 폴더들만 보이면 정상.
 
 ## 주의 사항
 
-- 프로젝트 내 `.claude/rules/` 파일을 **직접 수정하지 않는다**. 규칙 변경은 이 저장소에서 수정 후 서브모듈을 업데이트한다.
+- 프로젝트 내 규칙 서브모듈 파일을 **직접 수정하지 않는다**. 규칙 변경은 이 저장소에서 수정 후 서브모듈을 업데이트한다.
+- 프로젝트 루트의 `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`에는 이 저장소 규칙을 길게 복사하지 말고 링크만 둔다. 규칙 본문을 복사하면 시간이 지나며 서로 달라진다.
 - 서브모듈 관련 에러 발생 시 `git submodule update --init`을 실행한다.
 - CI/CD 파이프라인에서 클론할 때 `--recurse-submodules` 옵션을 추가해야 서브모듈이 함께 받아진다.
 - sparse-checkout `set` 명령을 잊고 push하면 팀원은 **전체 폴더**를 받을 수 있다. 설정을 README에 명시하거나 Makefile·스크립트로 자동화하는 것을 권장한다.
