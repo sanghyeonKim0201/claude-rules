@@ -42,8 +42,6 @@ gstack은 Claude Code뿐 아니라 Codex CLI, OpenCode, Cursor, Factory Droid, S
 | 배포된 실물을 브라우저로 조작·검증·스크린샷·DOM 확인이 필요 | `/browse` |
 | 원인 불명 버그 + 4-phase 구조화 리포트(스크린샷·타임라인)가 명시적으로 필요 | `/investigate` |
 
-> superpowers를 같이 쓰는 환경에서는 일반 디버깅의 기본값이 `systematic-debugging`이다. gstack `/investigate`는 구조화 리포트가 명시적으로 필요할 때만 수동 전환.
-
 ### 리뷰
 
 | 신호 | 후보 커맨드 |

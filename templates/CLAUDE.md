@@ -17,7 +17,6 @@
 - [UI 디자인 토큰](.ai/rules/ui/design-tokens.md)
 - [UI 상태](.ai/rules/ui/ui-states.md)
 - [gstack 사용 규칙](.ai/rules/gstack/gstack.md)
-- [superpowers 사용 규칙](.ai/rules/superpowers/superpowers.md)
 
 ## 사용 방법
 

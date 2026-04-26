@@ -13,7 +13,6 @@ AI 코딩 에이전트가 따라야 할 공유 코딩 규칙 모음. Claude Code
 | [`fsd/`](./fsd) | FSD 아키텍처 전용 규칙 | 레이어 구조, Public API, Import, 관심사 분리 |
 | [`ui/`](./ui) | UI/UX 설계 원칙 (프레임워크 무관) | 컴포넌트 API, 접근성, UI 상태, 디자인 토큰, 컴포지션 |
 | [`gstack/`](./gstack) | gstack 워크플로우 스킬/커맨드 사용 규칙 (지원 AI 에이전트 공통 선택 규칙) | 커맨드 카탈로그, 호출 트리거(신호 기반), 프로젝트 유형별 적용 범위 |
-| [`superpowers/`](./superpowers) | superpowers 플러그인 사용 규칙 (Claude Code 환경 전용 선택 규칙) | 스킬 카탈로그, 호출 트리거(신호 기반), gstack과의 역할 분담 |
 | [`templates/`](./templates) | 프로젝트 엔트리포인트 템플릿 | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `copilot-instructions.md` |
 
 ## 조합 원칙
@@ -23,7 +22,6 @@ AI 코딩 에이전트가 따라야 할 공유 코딩 규칙 모음. Claude Code
 - `nextjs`는 Next.js/React/TypeScript 프로젝트에서만 사용.
 - `ui`는 디자인 시스템·UI 컴포넌트 작업이 있는 프로젝트에서 사용 (프레임워크 무관).
 - `gstack`은 로컬 머신에 gstack이 설치돼 있고 현재 사용하는 AI 코딩 에이전트가 gstack host로 지원될 때 추가한다. 코어 규칙이 아니라 도구 실행 환경용 워크플로우 어댑터다.
-- `superpowers`는 superpowers 플러그인을 쓰는 Claude Code 프로젝트에만 추가한다. 코어 규칙이 아니라 특정 실행 환경용 워크플로우 어댑터다.
 - 새 에이전트 전용 규칙이 필요하면 기존 코어 폴더를 수정하지 말고 별도 폴더로 분리한다. 예: `codex/`, `cursor/`, `gemini/`.
 
 ## 프로젝트 유형별 조합
@@ -38,8 +36,6 @@ AI 코딩 에이전트가 따라야 할 공유 코딩 규칙 모음. Claude Code
 | 비 Next.js / 비 FSD | `common` + (해당 프레임워크 규칙) |
 | 특정 에이전트 워크플로우 사용 | (기존 조합) + 해당 에이전트 전용 폴더 |
 | gstack 워크플로우 사용 | (기존 조합) + `gstack` |
-| superpowers 플러그인 사용 | (기존 조합) + `superpowers` |
-| gstack + superpowers 둘 다 사용 | (기존 조합) + `gstack` + `superpowers` |
 
 ## 에이전트 중립 원칙
 
