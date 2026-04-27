@@ -50,7 +50,7 @@ AI 코딩 에이전트가 따라야 할 공유 코딩 규칙 모음. Claude Code
 
 ### 1. 프로젝트에 규칙 추가 (필요한 폴더만)
 
-권장 기본 경로는 `.ai/rules`다. 이미 특정 도구의 규칙 로더를 쓰고 있다면 해당 도구가 읽는 경로를 사용해도 된다.
+기본 경로는 `.ai/rules`로 통일한다. Claude Code, Codex, Cursor, Gemini CLI 등 어떤 에이전트를 쓰든 동일한 경로를 사용해 규칙을 한 곳에서 관리한다.
 
 ```bash
 cd <프로젝트 루트>
@@ -78,13 +78,12 @@ git commit -m "chore: AI 규칙 서브모듈 추가 (common/nextjs)"
 
 `fsd`, `ui`, 기타 폴더는 원격에 존재하지만 **이 프로젝트엔 받지 않는다.**
 
-기존 Claude Code 프로젝트는 경로를 유지해도 된다:
+기존에 `.claude/rules` 등 도구별 경로를 쓰고 있었다면 `.ai/rules`로 마이그레이션한다. 도구별 경로가 꼭 필요한 경우에는 실제 파일을 복사하지 말고 심볼릭 링크로 `.ai/rules`를 가리키게 한다.
 
 ```bash
-git submodule add <rules-repo-url> .claude/rules
+# 예: Claude Code가 .claude/rules 경로를 별도로 요구하는 경우
+ln -s ../.ai/rules .claude/rules
 ```
-
-중요한 것은 경로명이 아니라 필요한 규칙 폴더 조합을 같은 방식으로 관리하는 것이다.
 
 ### 2. 프로젝트 루트 엔트리포인트 연결
 
@@ -95,13 +94,15 @@ git submodule add <rules-repo-url> .claude/rules
 | 도구 | 권장 파일 |
 |---|---|
 | 여러 AI 에이전트 공통 | `AGENTS.md` |
-| Claude Code | `CLAUDE.md`, `CLAUDE.local.md`, `.claude/rules/*.md` |
+| Claude Code | `CLAUDE.md`, `CLAUDE.local.md` (본문은 `.ai/rules/*` 링크로 구성) |
 | Codex | `AGENTS.md` |
 | Gemini CLI | `GEMINI.md` 또는 설정한 context file name |
 | GitHub Copilot | `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `AGENTS.md` |
 | Cursor | `AGENTS.md`, `.cursor/rules/*.mdc`, `.cursorrules`(legacy) |
 | Windsurf | `AGENTS.md`, `.windsurf/rules/*.md` |
 | 여러 도구 병행 | `AGENTS.md`를 공통 허브로 두고, 도구 전용 파일은 `AGENTS.md` 또는 `.ai/rules`를 참조 |
+
+Claude Code도 다른 에이전트와 동일하게 규칙 본문은 `.ai/rules`에 두고, `CLAUDE.md`에는 해당 규칙 파일을 가리키는 **심볼릭 링크**(마크다운 링크)만 둔다. 규칙 본문을 `CLAUDE.md`에 복사하지 않는다.
 
 템플릿을 복사해 시작한다:
 
