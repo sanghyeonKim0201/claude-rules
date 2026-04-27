@@ -58,14 +58,21 @@ cd <프로젝트 루트>
 # 1) 서브모듈 추가 (전체 monorepo를 논리적으로 연결)
 git submodule add <rules-repo-url> .ai/rules
 
-# 2) sparse-checkout으로 필요한 폴더만 실제 체크아웃
+# 2) 템플릿 복사 (sparse-checkout 적용 전, templates가 아직 보일 때 한 번만)
+cp .ai/rules/templates/CLAUDE.md CLAUDE.md
+cp .ai/rules/templates/AGENTS.md AGENTS.md
+cp .ai/rules/templates/GEMINI.md GEMINI.md
+mkdir -p .github
+cp .ai/rules/templates/copilot-instructions.md .github/copilot-instructions.md
+
+# 3) sparse-checkout으로 실제 사용할 규칙 폴더만 남긴다 (templates는 자동 제외)
 cd .ai/rules
 git sparse-checkout init --cone
 git sparse-checkout set common nextjs        # 예: Next.js 프로젝트
 cd -
 
-# 3) 커밋
-git add .gitmodules .ai/rules
+# 4) 커밋
+git add .gitmodules .ai/rules CLAUDE.md AGENTS.md GEMINI.md .github/copilot-instructions.md
 git commit -m "chore: AI 규칙 서브모듈 추가 (common/nextjs)"
 ```
 
@@ -76,7 +83,7 @@ git commit -m "chore: AI 규칙 서브모듈 추가 (common/nextjs)"
 └── nextjs/
 ```
 
-`fsd`, `ui`, 기타 폴더는 원격에 존재하지만 **이 프로젝트엔 받지 않는다.**
+`fsd`, `ui`, `templates`, 기타 폴더는 원격에 존재하지만 **이 프로젝트엔 남지 않는다.** `templates`는 최초 setup에서 한 번 복사하고 sparse-checkout으로 자동 제외된다.
 
 기존에 `.claude/rules` 등 도구별 경로를 쓰고 있었다면 `.ai/rules`로 마이그레이션한다. 도구별 경로가 꼭 필요한 경우에는 실제 파일을 복사하지 말고 심볼릭 링크로 `.ai/rules`를 가리키게 한다.
 
@@ -104,14 +111,13 @@ ln -s ../.ai/rules .claude/rules
 
 Claude Code도 다른 에이전트와 동일하게 규칙 본문은 `.ai/rules`에 두고, `CLAUDE.md`에는 해당 규칙 파일을 가리키는 **심볼릭 링크**(마크다운 링크)만 둔다. 규칙 본문을 `CLAUDE.md`에 복사하지 않는다.
 
-템플릿을 복사해 시작한다:
+템플릿 복사는 **1번 절차의 step 2**에서 sparse-checkout 적용 전에 한 번만 수행한다. 이후에는 `.ai/rules/templates/`가 작업 트리에 남지 않으므로 같은 명령을 다시 실행할 수 없다. 템플릿을 다시 받고 싶다면 일시적으로 sparse-checkout에 `templates`를 추가했다가 복사 후 다시 빼면 된다.
 
 ```bash
-cp .ai/rules/templates/CLAUDE.md CLAUDE.md
-cp .ai/rules/templates/AGENTS.md AGENTS.md
-cp .ai/rules/templates/GEMINI.md GEMINI.md
-mkdir -p .github
-cp .ai/rules/templates/copilot-instructions.md .github/copilot-instructions.md
+# 템플릿이 필요할 때만 일시 추가
+cd .ai/rules && git sparse-checkout set common nextjs templates && cd -
+cp .ai/rules/templates/<file> .
+cd .ai/rules && git sparse-checkout set common nextjs && cd -
 ```
 
 프로젝트에 실제로 체크아웃한 규칙만 남긴다. 예를 들어 `common + nextjs`만 쓰면 엔트리포인트에는 다음 링크만 남긴다:
